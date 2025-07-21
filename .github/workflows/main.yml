@@ -1,0 +1,83 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+#fire now
+name: Install and Test Python package
+
+on:
+  push:
+    branches: [ "main"]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+          WLSSECRET: ${{ secrets.WLSSECRET }}
+          WLSACCESSID: ${{ secrets.WLSACCESSID }}
+          LICENSEID: ${{ secrets.LICENSEID}}
+          BOOLEANGHA: ${{ secrets.BOOLEANGHA}}
+          GHATOKEN: ${{ secrets.GHATOKEN }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+    
+    - uses: actions/checkout@v4
+    # - name: Set up Python ${{ matrix.python-version }}
+    #   uses: actions/setup-python@v3
+    #   with:
+    #     python-version: ${{ matrix.python-version }}
+    #     cache: 'pip'           
+    - name: Set up Venv     
+      env:
+          GHATOKEN: ${{ secrets.GHATOKEN }}     
+        # with:
+        #   cache: 'pip'
+      run: |
+          git config --global url."https://${GHATOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv venv --python 3.12
+
+    - name: Install dependencies
+
+      env:
+            WLSSECRET: ${{ secrets.WLSSECRET }}
+            WLSACCESSID: ${{ secrets.WLSACCESSID }}
+            LICENSEID: ${{ secrets.LICENSEID}}
+            BOOLEANGHA: ${{ secrets.BOOLEANGHA}}
+            GHATOKEN: ${{ secrets.GHATOKEN }}
+      run: |
+          uv sync 
+          uv pip install -e .
+          pip install flake8
+
+    # - name: Run pip-audit
+    #   env:
+    #       GHATOKEN: ${{ secrets.GHATOKEN }}
+    #   run: |
+    #       pip-audit -r ./requirements.txt \
+    #         --require-hashes \
+    #         --no-deps \
+    #         --auth-header="Authorization: token ${GHATOKEN}"
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 TaxSolver --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 TaxSolver --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      env:
+            WLSSECRET: ${{ secrets.WLSSECRET }}
+            WLSACCESSID: ${{ secrets.WLSACCESSID }}
+            LICENSEID: ${{ secrets.LICENSEID}}
+            BOOLEANGHA: ${{ secrets.BOOLEANGHA}}
+            GHATOKEN: ${{ secrets.GHATOKEN }}
+      run: |
+        uv run pytest

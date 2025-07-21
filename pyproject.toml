@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taxsolver"
+version = "0.1.0"
+description = "A module for optimization of tax systems"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "M.H. Schellekens", email = "m.h.schellekens@minfin.nl"},
+    {name = "Mark D. Verhagen"}
+]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "cvxpy>=1.7.1",
+    "gurobipy>=12.0.0",
+    "iniconfig>=2.0.0",
+    "matplotlib>=3.10.3",
+    "nbformat>=5.10.4",
+    "openpyxl>=3.1.5",
+    "packaging>=24.2",
+    "pandas>=2.2.3",
+    "pip>=2.4.1",
+    "plotly>=5.24.1",
+    "pluggy>=1.5.0",
+    "pyscipopt>=5.5.0",
+    "setuptools>=75.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ipykernel",
+    "mypy>=1.16.0",
+    "pandas-stubs>=2.2.3.250527",
+    "pre-commit>=4.0.1",
+    "pytest>=8.3.3",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
+
