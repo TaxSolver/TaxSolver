@@ -63,7 +63,7 @@ class GurobiBackend(AbstractBackend):
         for i in range(len(variables)):
             self.model.addConstr(aux_vars[i] == variables[i])
 
-        return self.model.addGenConstrMax(res_var, aux_vars, name=name)
+        return self.model.addGenConstrMax(res_var, list(aux_vars.values()), name=name)
 
     def quicksum(self, expressions: List[Expression]) -> Expression:
         return gp.quicksum(expressions)
