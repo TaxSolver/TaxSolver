@@ -4,11 +4,11 @@ from TaxSolver.tax_solver import TaxSolver
 from TaxSolver.rule import (
     BenefitRule,
     HouseholdBenefit,
-    BracketRule,
     PreTaxBenefit,
     ExistingBenefit,
     FlatTaxRule,
 )
+from TaxSolver.brackets import Brackets
 from TaxSolver.constraints.rule_constraints import ForceRateConstraint
 from TaxSolver.population.person import Person
 from TaxSolver.population.household import Household
@@ -177,14 +177,14 @@ def test_flat_tax_rule_active_and_tax_calculation(tax_solver):
 
 
 def test_bracket_rule_active_and_tax_calculation(tax_solver):
-    """Test BracketRule constraints and tax calculation."""
+    """Test Brackets constraints and tax calculation."""
     person = tax_solver.households["hh_1"].first_member
     person["income_before_tax_0_30000"] = 30_000
     person["income_before_tax_0_30000_is_marginal"] = 0
     person["income_before_tax_30000_50000"] = 20_000
     person["income_before_tax_30000_50000_is_marginal"] = 1
 
-    brackets = BracketRule(
+    brackets = Brackets(
         name="brackets",
         var_name="income_before_tax",
     )
@@ -246,7 +246,7 @@ def test_bracket_rule_inactive_when_rate_is_same(tax_solver):
     person["income_before_tax_30000_50000"] = 20_000
     person["income_before_tax_30000_50000_is_marginal"] = 1
 
-    brackets = BracketRule(
+    brackets = Brackets(
         name="brackets",
         var_name="income_before_tax",
     )

@@ -72,7 +72,6 @@ class SolvedSystem:
                     "TaxRule",
                     "FlatTaxRule",
                     "BenefitRule",
-                    "BracketRule",
                     "ExistingBenefit",
                 ]:
                     outcomes.append(self._calculate_outcome(person, rule))

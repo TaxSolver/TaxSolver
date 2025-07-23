@@ -1,3 +1,4 @@
+import TaxSolver as tx
 from TaxSolver.data_wrangling.data_loader import DataLoader
 from TaxSolver.constraints.budget_constraint import BudgetConstraint
 from TaxSolver.constraints.income_constraint import IncomeConstraint
@@ -9,7 +10,7 @@ from TaxSolver.objective import BudgetObjective
 from TaxSolver.backend.cvxpy_backend import CvxpyBackend
 from TaxSolver.tax_solver import TaxSolver
 from TaxSolver.data_wrangling.bracket_input import BracketInput
-from TaxSolver.rule import BracketRule
+from TaxSolver.brackets import Brackets
 from TaxSolver.backend.abstract_backend import AbstractBackend
 
 
@@ -71,7 +72,7 @@ class ScenarioHelper:
             )
 
             # Define solver variables for the optimization
-            group_brackets = BracketRule(
+            group_brackets = Brackets(
                 name=f"brackets_{k_group}",
                 var_name="income_before_tax",
                 k_group_var=k_group,
@@ -88,7 +89,7 @@ class ScenarioHelper:
         )
 
         # Define solver variables for the optimization
-        household_income_brackets = BracketRule(
+        household_income_brackets = tx.Brackets(
             name="household_income_brackets",
             var_name="household_income_before_tax",
             k_group_var="k_everybody",

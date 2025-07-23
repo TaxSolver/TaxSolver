@@ -151,7 +151,7 @@ def test_e2e_basic_small_progressive(people_and_households):
         group_vars=["k_everybody"],
     )
 
-    brackets = tx.BracketRule(
+    brackets = tx.Brackets(
         name="income_brackets",
         var_name="income_before_tax",
         k_group_var="k_everybody",
