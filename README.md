@@ -66,7 +66,7 @@ BracketInput.add_split_variables_to_solver(
 )
 
 # Define solver variables for the optimization
-income_tax = tx.BracketRule(
+income_tax = tx.Brackets(
     name="income_before_tax_k_everybody",
     var_name="income_before_tax",
     k_group_var="k_everybody",
