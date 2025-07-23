@@ -10,7 +10,6 @@ import TaxSolver as tx
 import pytest
 
 
-@pytest.mark.gurobi
 def test_alpha_k_b(people_and_households, gurobi_env):
     people, households = people_and_households
 

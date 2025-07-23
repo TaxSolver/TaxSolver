@@ -62,7 +62,6 @@ def test_backend_results_are_consistent(gurobi_env):
     )
 
 
-@pytest.mark.gurobi
 def test_backend_rule_rates_are_consistent_basic_small(
     people_and_households, gurobi_env
 ):

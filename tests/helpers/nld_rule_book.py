@@ -19,6 +19,7 @@ from TaxSolver.rule import FlatTaxRule
 from TaxSolver.rule import BenefitRule
 from TaxSolver.rule import ExistingBenefit
 from TaxSolver.rule import HouseholdBenefit
+from TaxSolver.rule import PreTaxBenefit
 
 if TYPE_CHECKING:  # pragma: no cover
     pass
@@ -69,6 +70,19 @@ class NLDRuleBook:
             weight=1,
         )
         return [rule]
+
+    @staticmethod
+    @tag("pretax")
+    def pretax() -> list["TaxRule"]:
+        rule = PreTaxBenefit(
+            name="pretax_benefit",
+            var_name="k_everybody",
+            lb=0,
+            ub=10_000,
+            weight=1,
+        )
+        return [rule]
+    
 
     @staticmethod
     @tag("basic", "household", "test")

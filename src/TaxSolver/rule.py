@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from functools import reduce
 import operator
 import gurobipy as grb
@@ -113,6 +113,7 @@ class TaxRule:
         self.marginal_pressure_scaler_var = marginal_pressure_scaler_var
         self.rule_considered_inactive_at = rule_considered_inactive_at
         self.metadata = metadata
+        self.population_products: List[float] = []
 
     def bind_and_initialize(self, tx: TaxSolver) -> None:
         """
@@ -195,6 +196,13 @@ class TaxRule:
 
         vals = [p[v] for v in self.var_name]
         product = reduce(operator.mul, vals, 1)
+
+        weighted_product = product * p.weight
+        if weighted_product > 0 or weighted_product < 0:
+            if not self.pretax:
+                self.population_products.append(weighted_product)
+            else:
+                self.population_products.append(weighted_product * (1 - p.new_marginal_rate))
 
         tax_i = (
             product * self.rate * (1 - p.new_marginal_rate)

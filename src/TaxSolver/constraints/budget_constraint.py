@@ -28,13 +28,11 @@ class BudgetConstraint(Constraint):
         print(f"Current tax balance {self.name}:", current_expenditures)
         self.current_expenditures = current_expenditures
 
-        new_person_expenditures = [p.weighted_tax_balance for p in self.people]
-        new_household_benefits = [
-            hh.weighted_household_benefits for hh in self.households
-        ]
-
         self.new_expenditures = backend.quicksum(
-            new_person_expenditures + new_household_benefits
+            [
+                (1 if r.benefit else -1) * sum(r.population_products) * r.rate
+                for r in solver.rules
+            ]
         )
 
         self.spend = self.new_expenditures - current_expenditures
