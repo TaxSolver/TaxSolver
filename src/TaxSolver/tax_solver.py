@@ -2,10 +2,8 @@ import pandas as pd
 from TaxSolver.backend.abstract_backend import AbstractBackend
 from TaxSolver.population.household import Household
 from TaxSolver.population.person import Person
-from TaxSolver.rule import (
-    TaxRule,
-    BracketRule,
-)
+from TaxSolver.rule import TaxRule
+from TaxSolver.brackets import Brackets
 
 # from TaxSolver.solved_system import SolvedSystem
 from typing import Optional
@@ -44,10 +42,10 @@ class TaxSolver:
     def add_rules(self, rules: list[TaxRule]) -> None:
         """
         Bind every rule to solver.
-        If a rule is a BracketRule it may spawn child FlatTaxRules.
+        If a rule is Brackets it may spawn child FlatTaxRules.
         """
         for rule in rules:
-            if isinstance(rule, BracketRule):
+            if isinstance(rule, Brackets):
                 rule.bind_and_initialize(self)
                 self.rules.extend(rule.flat_rules)
             else:

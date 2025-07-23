@@ -40,7 +40,7 @@ def test_alpha_k_b(people_and_households, gurobi_env):
         group_vars=["k_test2"],
     )
 
-    universal_brackets = tx.BracketRule(
+    universal_brackets = tx.Brackets(
         name="universal_income_brackets",
         var_name="income_before_tax",
         k_group_var="k_everybody",
@@ -48,7 +48,7 @@ def test_alpha_k_b(people_and_households, gurobi_env):
         lb=-1,
     )
 
-    ktest1_brackets = tx.BracketRule(
+    ktest1_brackets = tx.Brackets(
         name="ktest1_income_brackets",
         var_name="income_before_tax",
         k_group_var="k_test1",
@@ -56,7 +56,7 @@ def test_alpha_k_b(people_and_households, gurobi_env):
         lb=-1,
     )
 
-    ktest2_brackets = tx.BracketRule(
+    ktest2_brackets = tx.Brackets(
         name="ktest2_income_brackets",
         var_name="income_before_tax",
         k_group_var="k_test2",

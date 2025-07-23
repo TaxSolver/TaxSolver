@@ -101,7 +101,7 @@ class Objective:
             Gurobi variable representing the highest marginal tax pressure
             in the system, used to minimize tax burden concentration.
         """
-        return self.tx.highest_marginal_pressure
+        return self.marginal_pressure_constraint.highest_marginal_pressure
 
 
 class NullObjective(Objective):
@@ -283,10 +283,12 @@ class WeightedMixedObjective(BudgetObjective):
     def __init__(
         self,
         budget_constraint: BudgetConstraint,
+        marginal_pressure_constraint: MarginalPressureConstraint,
         complexity_penalty: int = 15,
         marginal_pressure_penalty: int = 1,
     ):
         super().__init__(budget_constraint)
+        self.marginal_pressure_constraint = marginal_pressure_constraint
         self.complexity_penalty = complexity_penalty
         self.marginal_pressure_penalty = marginal_pressure_penalty
 

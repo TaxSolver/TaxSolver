@@ -27,7 +27,7 @@ def test_progressive_marginal_rate(people_and_households):
         "all_households", [v for v in households.values()], 0.1, 0.1
     )
 
-    progressive_brackets = tx.BracketRule(
+    progressive_brackets = tx.Brackets(
         name="progressive_income_tax",
         var_name="income_before_tax",
         ub=1,

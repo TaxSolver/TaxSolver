@@ -5,6 +5,7 @@ import gurobipy as grb
 from TaxSolver.backend import GurobiBackend, CvxpyBackend
 from TaxSolver.population.person import Person
 from TaxSolver.population.household import Household
+from TaxSolver.data_wrangling.data_loader import DataLoader
 from helpers.solved_system.solved_system import SolvedSystem
 
 
@@ -118,3 +119,29 @@ def backend(request, gurobi_env):
     else:
         print("Using Cvxpy backend")
         return CvxpyBackend()
+
+@pytest.fixture(scope="session")
+def data_loader():
+    return DataLoader(
+            "tests/e2e/ipo_fixtures/df_employment_only_with_extreme_earners.xlsx",
+            income_before_tax="income_before_tax",
+            income_after_tax="income_after_tax",
+            weight="weight",
+            id="id",
+            hh_id="hh_id",
+            mirror_id="mirror_id",
+            input_vars=[
+                "number_of_kids_0_5",
+                "number_of_kids_6_11",
+                "number_of_kids_12_15",
+                "number_of_kids_16_17",
+                "number_of_kids",
+                "monthly_rent",
+                "assets",
+                "partner_income",
+                "other_income",
+                "woz",
+                "mortgage_interest",
+            ],
+            group_vars=["fiscal_partner", "partner_type_of_income"],
+        )

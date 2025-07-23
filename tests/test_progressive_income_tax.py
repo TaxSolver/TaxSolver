@@ -26,7 +26,7 @@ def test_progressive_tax_rules_factory(people_and_households):
         "all_households", [v for v in households.values()], 0, 0
     )
 
-    universal_brackets = tx.BracketRule(
+    universal_brackets = tx.Brackets(
         name="progressive_income_tax",
         var_name="income_before_tax",
         ub=1,

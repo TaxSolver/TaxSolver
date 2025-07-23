@@ -38,7 +38,7 @@ def test_readme_bracket_rule_optimization(backend):
         group_vars=["k_everybody"],
     )
 
-    income_tax = tx.BracketRule(
+    income_tax = tx.Brackets(
         name="income_before_tax_k_everybody",
         var_name="income_before_tax",
         k_group_var="k_everybody",
