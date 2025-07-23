@@ -28,12 +28,12 @@ Across the developed world, there are growing calls to streamline and improve ev
 
 ### Install from source
 ```bash
-pip install git+https://github.com/Tax-Lab/TaxSolver.git
+pip install git+https://github.com/TaxSolver/TaxSolver.git
 ```
 
 ### Install for development
 ```bash
-git clone https://github.com/Tax-Lab/TaxSolver.git
+git clone https://github.com/TaxSolver/TaxSolver.git
 cd TaxSolver
 pip install -e .
 ```
@@ -138,7 +138,7 @@ If you use TaxSolver in your research, please cite:
   title={TaxSolver: A Design Tool for Optimal Income Tax Reform},
   author={Verhagen, M.D, Schellekens, M., and Garstka, M.},
   year={2025},
-  note={Software available at: https://github.com/Tax-Lab/TaxSolver.git}
+  note={Software available at: https://github.com/TaxSolver/TaxSolver.git}
 }
 ```
 
@@ -152,7 +152,7 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ## Support
 
-- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/Tax-Lab/TaxSolver/issues)
+- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/TaxSolver/TaxSolver/issues)
 - **Documentation**: Full documentation available at [project website] TODO
 - **Academic Paper**: [Link to published paper] TODO
 
