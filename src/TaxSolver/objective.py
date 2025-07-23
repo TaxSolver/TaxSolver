@@ -1,6 +1,6 @@
 from __future__ import annotations
 from TaxSolver.backend.abstract_backend import Variable
-
+from TaxSolver.constraints.marginal_pressure_constraint import MarginalPressureConstraint
 from TaxSolver.constraints.budget_constraint import BudgetConstraint
 
 
@@ -90,18 +90,6 @@ class Objective:
             used to measure system complexity.
         """
         return self.tx.rule_weight
-
-    def _highest_marginal_pressure(self) -> Variable:
-        """
-        Get the highest marginal pressure variable from the tax solver.
-
-        Returns
-        -------
-        Variable
-            Gurobi variable representing the highest marginal tax pressure
-            in the system, used to minimize tax burden concentration.
-        """
-        return self.marginal_pressure_constraint.highest_marginal_pressure
 
 
 class NullObjective(Objective):
@@ -214,10 +202,12 @@ class SequentialMixedObjective(BudgetObjective):
     def __init__(
         self,
         budget_constraint: BudgetConstraint,
+        marginal_pressure_constraint: MarginalPressureConstraint,
         budget_tolerance: int = 100,
         complexity_tolerance: int = 15,
     ):
         super().__init__(budget_constraint)
+        self.marginal_pressure_constraint = marginal_pressure_constraint
         self.budget_tolerance = budget_tolerance
         self.complexity_tolerance = complexity_tolerance
 
@@ -253,9 +243,21 @@ class SequentialMixedObjective(BudgetObjective):
             priority=1,
             name="Marginal Pressure",
         )
+    
+    def _highest_marginal_pressure(self) -> Variable:
+        """
+        Get the highest marginal pressure variable from the tax solver.
+
+        Returns
+        -------
+        Variable
+            Gurobi variable representing the highest marginal tax pressure
+            in the system, used to minimize tax burden concentration.
+        """
+        return self.marginal_pressure_constraint.highest_marginal_pressure
 
 
-class WeightedMixedObjective(BudgetObjective):
+class WeightedMixedObjective(SequentialMixedObjective):
     """
     Multi-objective optimization using weighted combination.
 
@@ -287,8 +289,7 @@ class WeightedMixedObjective(BudgetObjective):
         complexity_penalty: int = 15,
         marginal_pressure_penalty: int = 1,
     ):
-        super().__init__(budget_constraint)
-        self.marginal_pressure_constraint = marginal_pressure_constraint
+        super().__init__(budget_constraint, marginal_pressure_constraint)
         self.complexity_penalty = complexity_penalty
         self.marginal_pressure_penalty = marginal_pressure_penalty
 
@@ -311,7 +312,7 @@ class WeightedMixedObjective(BudgetObjective):
         )
 
 
-class WeightedMixedLabourEffectsObjective(BudgetObjective):
+class WeightedMixedLabourEffectsObjective(SequentialMixedObjective):
     """
     Multi-objective optimization including labor effects considerations.
 
@@ -349,12 +350,13 @@ class WeightedMixedLabourEffectsObjective(BudgetObjective):
 
     def __init__(
         self,
-        budget_constraint: BudgetConstraint,
+        budget_constraint: BudgetConstraint, 
+        marginal_pressure_constraint: MarginalPressureConstraint,
         complexity_penalty: int = 15,
         marginal_pressure_penalty: int = 1,
         labor_effects_penalty: float = 100 * 5_000 * 0.4,
     ):
-        super().__init__(budget_constraint)
+        super().__init__(budget_constraint, marginal_pressure_constraint)
         self.complexity_penalty = complexity_penalty
         self.marginal_pressure_penalty = marginal_pressure_penalty
         self.labor_effects_penalty = labor_effects_penalty
