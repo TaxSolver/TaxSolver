@@ -1471,6 +1471,7 @@ dependencies = [
     { name = "plotly" },
     { name = "pluggy" },
     { name = "pyscipopt" },
+    { name = "pytest" },
     { name = "setuptools" },
 ]
 
@@ -1501,6 +1502,7 @@ requires-dist = [
     { name = "pluggy", specifier = ">=1.5.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
     { name = "pyscipopt", specifier = ">=5.5.0" },
+    { name = "pytest", specifier = ">=8.3.3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.3" },
     { name = "setuptools", specifier = ">=75.5.0" },
 ]
