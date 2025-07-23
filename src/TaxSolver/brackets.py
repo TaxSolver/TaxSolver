@@ -1,4 +1,5 @@
 from TaxSolver.rule import TaxRule, FlatTaxRule
+from TaxSolver.tax_solver import TaxSolver
 from typing import Optional
 
 class Brackets(TaxRule):
