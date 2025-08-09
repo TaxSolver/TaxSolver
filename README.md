@@ -2,7 +2,7 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![arXiv](https://img.shields.io/badge/arXiv-DOI%20TBD-b31b1b.svg)](https://arxiv.org/abs/DOI_TBD)
+[![arXiv](https://img.shields.io/badge/arXiv-DOI_10_48550-b31b1b.svg)](https://arxiv.org/abs/2508.03708)
 
 **TaxSolver** is a constrained optimization-based tool that enables policymakers to design optimal income tax reforms by focusing on the desired outcomes of a reform in conjunction with fiscal guarantees that a reform has to abide by rather than ad-hoc rule adjustments.
 
@@ -39,6 +39,9 @@ pip install -e .
 ```
 
 ## Quick Start
+
+### Example
+Here is an example of a simple tax reform:
 
 ```python
 import os
@@ -95,30 +98,22 @@ tax_solver.add_objective(BudgetObjective(budget_constraint))
 # View results
 print(tax_solver.rules_and_rates_table())
 ```
-
-## Documentation
-
-- **Tutorial**: See `notebooks/example_notebook.ipynb` for a comprehensive walkthrough
-- **Documentation**: Check the `documentation/` directory for background:
-  - `methods.md`: Methods underlying `TaxSolver`
-  - `dataloader.md`: Preparing your data set for `TaxSolver`
+### Numerical solver
+We are using Gurobi as the numerical solver to solve the underlying optimization problem. You can request a free license for academic research [here](https://www.gurobi.com/features/academic-named-user-license/). We also support other LP/MILP solvers via our [cvxpy backend](https://www.cvxpy.org/tutorial/solvers/index.html#choosing-a-solver). For smaller toy systems, we found that the open source solver [SCIP](https://www.scipopt.org/) showed adequate performance.
 
 ## Project Structure
 
 ```
 TaxSolver/
 ├── src/TaxSolver/           # Main package
-│   ├── data_loader.py       # Data input handling
-│   ├── household/           # Household and person models
-│   ├── optimalisation/      # Optimization engine
-│   │   ├── constraints/     # Constraint definitions
-│   │   ├── rules/           # Tax rule implementations
-│   │   └── tax_solver/      # Core solver logic
-│   └── solved_system/       # Results and output
-├── paper/                   # Academic paper and examples
+│   ├── tax_solver.py        # Main class
+│   ├── backend/             # interaction with numerical solver (gurobi or others via cvxpy)
+│   ├── constraints/         # Constraint definitions
+│   ├── data_wrangling/      # Loading and transforming the input dataset
+│   ├── objective.py         # Reform objectives
+│   ├── rule.py              # Tax rule definitions
 ├── tests/                   # Test suite
-├── notebooks/               # Notebooks
-├── documentation/           # Background documentation
+├── notebooks/               # Example Notebooks
 └── data/                    # Example datasets
 ```
 
@@ -131,33 +126,33 @@ TaxSolver/
 
 ## Citation
 
+**Academic Paper**: A preprint version is available [here](https://arxiv.org/abs/2508.03708).
+
 If you use TaxSolver in your research, please cite:
 
 ```bibtex
-@article{taxsolver2024,
+@article{taxsolver_2025,
   title={TaxSolver: A Design Tool for Optimal Income Tax Reform},
-  author={Verhagen, M.D, Schellekens, M., and Garstka, M.},
+  author={Mark Donald Verhagen and Menno Schellekens and Michael Garstka},
+  journal={arXiv pre-print: 2508.03708},
   year={2025},
-  note={Software available at: https://github.com/Tax-Lab/TaxSolver.git}
+  note={Software available at: https://github.com/Tax-Lab/TaxSolver.git},
+  url={https://arxiv.org/abs/2508.03708}
 }
 ```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
-## Contributing
+## Contributing and Support
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and suggest improvements.
+We welcome contributions! Please use [GitHub Issues](https://github.com/Tax-Lab/TaxSolver/issues) to submit pull requests, report issues, and suggest improvements.
 
-## Support
 
-- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/Tax-Lab/TaxSolver/issues)
-- **Documentation**: Full documentation available at [project website] TODO
-- **Academic Paper**: [Link to published paper] TODO
 
 ## Authors
 
-Mark Verhagen
-Menno Schellekens
-Michael Garstka
+- [Mark Verhagen](https://markverhagen.me/)
+- Menno Schellekens
+- [Michael Garstka](https://migarstka.github.io/)
