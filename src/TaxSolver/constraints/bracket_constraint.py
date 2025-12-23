@@ -1,5 +1,4 @@
 from TaxSolver.constraints.constraint import Constraint
-import gurobipy as grb
 
 
 class BracketConstraint(Constraint):
@@ -20,13 +19,15 @@ class BracketConstraint(Constraint):
         self.min_gap = min_gap
 
     def apply(self, tx) -> None:
+        backend = tx.backend
+
         ## Get rules from the tx
         ## Only return rules in line with the rule family
         # rules = [r for r in tx.rules if r.family == self.rule_family]
         # Set limit for active brackets
         if self.max_brackets:
-            active_brackets = grb.quicksum([rule.b for rule in self.brackets])
-            tx.model.addConstr(
+            active_brackets = backend.quicksum([rule.b for rule in self.brackets])
+            backend.add_constr(
                 active_brackets <= self.max_brackets,
                 name=f"max_brackets_{self.brackets[0].family}",
             )
@@ -35,7 +36,7 @@ class BracketConstraint(Constraint):
         if self.ascending is True:
             for rule in self.brackets:
                 if rule.prev_bracket:
-                    tx.model.addConstr(
+                    backend.add_constr(
                         rule.rate >= rule.prev_bracket.rate,
                         name=f"ascending_{rule.name}",
                     )
@@ -43,12 +44,12 @@ class BracketConstraint(Constraint):
         if self.start_from_first_inflection:
             first_rule = self.brackets[0]
             for r in self.brackets[1:]:
-                tx.model.addConstr(
+                backend.add_constr(
                     r.b <= first_rule.b, name=f"start_from_first_inflection_{r.name}"
                 )
 
         if self.last_bracket_zero is True:
-            tx.model.addConstr(
+            backend.add_constr(
                 self.brackets[-1].rate == 0,
                 name=f"last_bracket_zero_{self.brackets[-1].family}",
             )
@@ -61,8 +62,9 @@ class BracketConstraint(Constraint):
         for i in range(len(self.brackets) - self.min_gap - 1):
             neighbor_sets.append(self.brackets[i : i + self.min_gap])
 
-        set_sums = [grb.quicksum([rule.b for rule in set]) for set in neighbor_sets]
-        tx.model.addConstrs((set_sums[i] <= 1) for i in range(len(set_sums)))
+        set_sums = [backend.quicksum([rule.b for rule in s]) for s in neighbor_sets]
+        for i, set_sum in enumerate(set_sums):
+            backend.add_constr(set_sum <= 1, name=f"min_gap_{i}")
 
     def __repr__(self) -> str:
         return self.key
