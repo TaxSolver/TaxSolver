@@ -10,6 +10,8 @@ from TaxSolver.rule import (
 # from TaxSolver.solved_system import SolvedSystem
 from typing import Optional
 from TaxSolver.constraints.constraint import Constraint
+from TaxSolver.constraints.behavioral_effects import BehavioralEffects
+from TaxSolver.constraints.budget_constraint import BudgetConstraint
 from TaxSolver.objective import Objective
 from TaxSolver.backend import CvxpyBackend
 
@@ -20,6 +22,8 @@ class TaxSolver:
         households: dict[str, Household],
         backend: AbstractBackend = CvxpyBackend(),
         name: str = "TaxModel",
+        behavioral_effects: bool = False,
+        behavioral_elasticity: Optional[float] = None,
     ):
         assert self._check_unique_ids(households), "Not all ids are unique strings!"
         self.objective: Optional[Objective] = None
@@ -29,6 +33,11 @@ class TaxSolver:
         self.rules: list[TaxRule] = []
         self.households: dict[str, Household] = households
         self.name = name
+        self.behavioral_effects = behavioral_effects
+        self.behavioral_elasticity = behavioral_elasticity
+        self.behavioral_effects_constraint = (
+            None  # Will be set if behavioral_effects=True
+        )
 
         self.solved = False
 
@@ -67,8 +76,22 @@ class TaxSolver:
         # Set rules on household level
         [hh.update_solver_variables(self.rules) for hh in self.households.values()]
 
+        # If behavioral effects are enabled, add the constraint before other constraints
+        if self.behavioral_effects:
+            behavioral_constraint = BehavioralEffects(
+                elasticity=self.behavioral_elasticity
+            )
+            behavioral_constraint.apply(self)
+            print(
+                f"Behavioral effects enabled with elasticity={self.behavioral_elasticity or 'per-person'}"
+            )
+
         # Apply all constraints now that the model is fully built
-        for constraint in self.constraints:
+        # Sort constraints to ensure BehavioralEffects is applied before BudgetConstraint
+        sorted_constraints = sorted(
+            self.constraints, key=lambda c: 1 if isinstance(c, BudgetConstraint) else 0
+        )
+        for constraint in sorted_constraints:
             constraint.apply(self)
 
         # Bind and set the objective now that all variables are created

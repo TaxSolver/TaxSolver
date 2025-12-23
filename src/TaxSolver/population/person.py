@@ -68,6 +68,11 @@ class Person:
         self.change_in_income_increase_factor = None
         self.weight_percentage_change = None
 
+        # Behavioral effects variables
+        self.behavioral_income_change = None
+        self.behavioral_tax_effect = None
+        self.net_behavioral_effect = None
+
     def create_solver_variables(self):
         """
         Create basic optimization variables for the person in the Gurobi model.
