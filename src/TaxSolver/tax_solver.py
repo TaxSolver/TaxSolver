@@ -154,7 +154,7 @@ class TaxSolver:
 
     @property
     def rule_weight(self):
-        return self.backend.quicksum([rule.b for rule in self.rules])
+        return self.backend.quicksum([rule.b * rule.weight for rule in self.rules])
 
     @property
     def people(self) -> dict[str, Person]:
