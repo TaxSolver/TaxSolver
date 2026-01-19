@@ -67,34 +67,45 @@ class CvxpyBackend(AbstractBackend):
     def add_gen_constr_indicator(
         self, bin_var: Variable, bin_val: bool, expression: Expression, name: str = ""
     ):
-        # CVXPY's implication operator `>>` can cause a TypeError with equality constraints.
-        # We use a big-M formulation for equality constraints as a workaround.
-        # For inequality constraints, `>>` should work fine.
-        M = 1e5  # A large number, should be chosen carefully based on problem scaling.
+        # CVXPY's implication operator `>>` doesn't work reliably between constraint types.
+        # We use a big-M formulation for all constraint types as a workaround.
+        M = 1e9  # A large number, should be chosen carefully based on problem scaling.
 
-        if not isinstance(expression, cp.constraints.Equality):
-            if bin_val:
-                self.constraints.append((bin_var == 1) >> expression)
-            else:
-                self.constraints.append((bin_var == 0) >> expression)
-            return
+        if isinstance(expression, cp.constraints.Equality):
+            # It's an equality constraint, e.g., lhs == rhs.
+            # We rewrite it as e = lhs - rhs, and enforce e == 0.
+            e = expression.args[0] - expression.args[1]
 
-        # It's an equality constraint, e.g., lhs == rhs.
-        # We rewrite it as e = lhs - rhs, and enforce e == 0.
-        e = expression.args[0] - expression.args[1]
+            if bin_val:  # bin_var == 1 => e == 0
+                # This is equivalent to:
+                # e <= M * (1 - bin_var)
+                # e >= -M * (1 - bin_var)
+                self.constraints.append(e <= M * (1 - bin_var))
+                self.constraints.append(e >= -M * (1 - bin_var))
+            else:  # bin_var == 0 => e == 0
+                # This is equivalent to:
+                # e <= M * bin_var
+                # e >= -M * bin_var
+                self.constraints.append(e <= M * bin_var)
+                self.constraints.append(e >= -M * bin_var)
 
-        if bin_val:  # bin_var == 1 => e == 0
-            # This is equivalent to:
-            # e <= M * (1 - bin_var)
-            # e >= -M * (1 - bin_var)
-            self.constraints.append(e <= M * (1 - bin_var))
-            self.constraints.append(e >= -M * (1 - bin_var))
-        else:  # bin_var == 0 => e == 0
-            # This is equivalent to:
-            # e <= M * bin_var
-            # e >= -M * bin_var
-            self.constraints.append(e <= M * bin_var)
-            self.constraints.append(e >= -M * bin_var)
+        elif isinstance(expression, cp.constraints.Inequality):
+            # It's an inequality constraint, e.g., lhs <= rhs (CVXPY normalizes to <=).
+            # expression.args[0] <= expression.args[1]
+            lhs = expression.args[0]
+            rhs = expression.args[1]
+
+            if bin_val:  # bin_var == 1 => lhs <= rhs
+                # Reformulate as: lhs <= rhs + M * (1 - bin_var)
+                self.constraints.append(lhs <= rhs + M * (1 - bin_var))
+            else:  # bin_var == 0 => lhs <= rhs
+                # Reformulate as: lhs <= rhs + M * bin_var
+                self.constraints.append(lhs <= rhs + M * bin_var)
+
+        else:
+            raise TypeError(
+                f"Unsupported constraint type for indicator constraint: {type(expression)}"
+            )
 
     def add_gen_constr_max(
         self, res_var: Variable, variables: List[Variable], name: str = ""
