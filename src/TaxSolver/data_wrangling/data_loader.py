@@ -360,8 +360,10 @@ class DataLoader:
                 self.people[member.id] = Person(dict(member))
                 hh_members.append(self.people[member.id])
 
+            # Use first member's weight as household weight
+            # This assumes all members of the household have the same weight
             self.households[str(hh_id)] = Household(
-                str(hh_id), hh_members, weight=member["weight"]
+                str(hh_id), hh_members, weight=hh_members[0]["weight"]
             )
 
     def _set_mirror_households(self) -> None:
