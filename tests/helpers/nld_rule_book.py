@@ -37,9 +37,6 @@ def tag(*tags):
 class NLDRuleBook:
     """New object-returning implementation of the Dutch rule-book."""
 
-    # ---------------------------------------------------------------------
-    # Helper utilities
-    # ---------------------------------------------------------------------
     @classmethod
     def _return(cls, *rules: "TaxRule") -> list["TaxRule"]:
         """Convenience: wrap arbitrary rule objects in a list, flattening
@@ -52,10 +49,6 @@ class NLDRuleBook:
             else:
                 flat.append(r)  # type: ignore[arg-type]
         return flat
-
-    # ------------------------------------------------------------------
-    # PORTED RULES (test/basic/sq tags)
-    # ------------------------------------------------------------------
 
     @staticmethod
     @tag("basic", "homeowner", "test")
@@ -80,13 +73,6 @@ class NLDRuleBook:
             weight=10,
         )
         return [rule]
-
-    # ------------------------------------------------------------------
-    # Simple benefits/taxes copied verbatim
-
-    # ------------------------------------------------------------------
-    # Progressive income-tax bracket helpers
-    # ------------------------------------------------------------------
 
     @staticmethod
     @tag("personal", "basic", "sq", "test")
@@ -212,6 +198,42 @@ class NLDRuleBook:
             for b in benefits
         ]
 
+    @staticmethod
+    @tag("basic", "minimal-test")
+    def basistoeslag() -> list["TaxRule"]:
+        """Base allowance per person (inkomensonafhankelijke zorgtoeslag)."""
+        rule = BenefitRule(
+            name="inkomensonafhankelijke_zorgtoeslag_persoon",
+            var_name="k_everybody",
+            ub=5_000,
+            weight=1,
+        )
+        return [rule]
+
+    @staticmethod
+    @tag("basic", "household", "test")
+    def basistoeslag_huishouden() -> list["TaxRule"]:
+        """Base allowance per household."""
+        rule = HouseholdBenefit(
+            name="inkomensonafhankelijke_zorgtoeslag_huishouden",
+            var_name="k_everybody",
+            ub=10_000,
+            weight=10,
+        )
+        return [rule]
+
+    @staticmethod
+    @tag("basic", "test")
+    def basistoeslag_huishouden_single_topup() -> list["TaxRule"]:
+        """Single topup for household base allowance."""
+        rule = HouseholdBenefit(
+            name="inkomensonafhankelijke_zorgtoeslag_huishouden_single_topup",
+            var_name="k_single",
+            ub=1_200,
+            weight=10,
+        )
+        return [rule]
+
     # ------------------------------------------------------------------
     # Shared helpers
     # ------------------------------------------------------------------
@@ -239,20 +261,11 @@ class NLDRuleBook:
     def default_rent_inflection_points() -> list[int]:
         return [i * 12 for i in range(0, 2000, 400)]
 
-    # ------------------------------------------------------------------
-    # TODO: the remaining methods still need porting.  They currently
-    # return an empty list so that code importing the class does not fail.
-    # ------------------------------------------------------------------
-
     @staticmethod  # noqa: D401 – simple wrappers are fine
     @tag("basic")
     def _placeholder() -> list["TaxRule"]:  # pragma: no cover
         """Temporary stub for not-yet-ported rules."""
         return []
-
-    # ------------------------------------------------------------------
-    # Tag selection helpers (equivalent to the old implementation)
-    # ------------------------------------------------------------------
 
     @classmethod
     def get_methods_with_tags(cls, include_tags, exclude_tags):
