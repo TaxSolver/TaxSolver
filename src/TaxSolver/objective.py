@@ -93,15 +93,31 @@ class Objective:
 
     def _highest_marginal_pressure(self) -> Variable:
         """
-        Get the highest marginal pressure variable from the tax solver.
+        Get the highest marginal pressure variable from the MarginalPressureConstraint.
 
         Returns
         -------
         Variable
             Gurobi variable representing the highest marginal tax pressure
             in the system, used to minimize tax burden concentration.
+
+        Raises
+        ------
+        ValueError
+            If no MarginalPressureConstraint has been added to the solver.
         """
-        return self.tx.highest_marginal_pressure
+        from TaxSolver.constraints.marginal_pressure_constraint import (
+            MarginalPressureConstraint,
+        )
+
+        for constraint in self.tx.constraints:
+            if isinstance(constraint, MarginalPressureConstraint):
+                return constraint.highest_marginal_pressure
+
+        raise ValueError(
+            "No MarginalPressureConstraint found. Add one before using "
+            "marginal_pressure in SequentialMixedObjective."
+        )
 
 
 class NullObjective(Objective):
@@ -157,14 +173,17 @@ class BudgetObjective(Objective):
 
     def _spend(self) -> Variable:
         """
-        Get the expenditures variable from the budget constraint.
+        Get the change in expenditures from the budget constraint.
 
         Returns
         -------
         Variable
-            Gurobi variable representing total new expenditures.
+            Gurobi variable representing the change in expenditures
+            (new_expenditures - current_expenditures). Minimizing this
+            means minimizing additional spending (or maximizing additional
+            tax collection).
         """
-        return self.budget_constraint.new_expenditures
+        return self.budget_constraint.spend
 
 
 class ComplexityObjective(Objective):
@@ -191,67 +210,83 @@ class SequentialMixedObjective(BudgetObjective):
     Multi-objective optimization using hierarchical priorities.
 
     This objective combines multiple goals with different priority levels,
-    optimizing them sequentially in order of importance. Budget has the
-    highest priority, followed by complexity, then marginal pressure.
+    optimizing them sequentially in order of importance. You can flexibly
+    specify which objectives to include and their priorities via a dictionary.
 
     Parameters
     ----------
     budget_constraint : BudgetConstraint
         The budget constraint that defines expenditures.
-    budget_tolerance : int, optional
-        Absolute tolerance for budget objective, by default 100.
-    complexity_tolerance : int, optional
-        Absolute tolerance for complexity objective, by default 15.
-
-    Attributes
-    ----------
-    budget_tolerance : int
-        Tolerance level for budget optimization.
-    complexity_tolerance : int
-        Tolerance level for complexity optimization.
+    objectives : dict, optional
+        Dictionary mapping objective names to their priorities (higher = more important).
+        Valid keys: "budget", "complexity", "marginal_pressure"
+        Example: {"budget": 2, "complexity": 1} optimizes budget first, then complexity.
+        Default: {"budget": 2, "complexity": 1}
+    tolerances : dict, optional
+        Dictionary mapping objective names to their absolute tolerances.
+        Example: {"budget": 100, "complexity": 10}
+        Default: {"budget": 100, "complexity": 15, "marginal_pressure": 0}
     """
+
+    # Valid objective names and their getter methods
+    _OBJECTIVE_GETTERS = {
+        "budget": "_spend",
+        "complexity": "_rule_weight",
+        "marginal_pressure": "_highest_marginal_pressure",
+    }
+
+    # Default tolerances for each objective
+    _DEFAULT_TOLERANCES = {
+        "budget": 100,
+        "complexity": 15,
+        "marginal_pressure": 0,
+    }
 
     def __init__(
         self,
         budget_constraint: BudgetConstraint,
-        budget_tolerance: int = 100,
-        complexity_tolerance: int = 15,
+        objectives: dict = None,
+        tolerances: dict = None,
     ):
         super().__init__(budget_constraint)
-        self.budget_tolerance = budget_tolerance
-        self.complexity_tolerance = complexity_tolerance
+
+        # Default: budget + complexity
+        if objectives is None:
+            objectives = {"budget": 2, "complexity": 1}
+
+        # Validate objective names
+        invalid_keys = set(objectives.keys()) - set(self._OBJECTIVE_GETTERS.keys())
+        if invalid_keys:
+            raise ValueError(
+                f"Invalid objective names: {invalid_keys}. "
+                f"Valid names: {list(self._OBJECTIVE_GETTERS.keys())}"
+            )
+
+        self.objectives = objectives
+        self.tolerances = {**self._DEFAULT_TOLERANCES, **(tolerances or {})}
 
     def set_objective(self) -> None:
         """
         Set up hierarchical multi-objective optimization.
 
-        Configures three objectives with different priorities:
-        1. Budget (priority 3, highest): Minimize expenditures
-        2. Complexity (priority 2): Minimize rule weight
-        3. Marginal Pressure (priority 1, lowest): Minimize highest marginal rate
-
-        The solver will optimize objectives in priority order, using the
-        specified tolerances to determine when each objective is satisfied.
+        Configures objectives based on the priorities specified in the objectives dict.
+        Higher priority values are optimized first.
         """
-        self.tx.backend.set_objective_n(
-            self._spend(),
-            index=0,
-            priority=3,
-            name="Budget",
-            abstol=self.budget_tolerance,
+        # Sort objectives by priority (highest first) for consistent ordering
+        sorted_objectives = sorted(
+            self.objectives.items(), key=lambda x: x[1], reverse=True
         )
+
+        for index, (name, priority) in enumerate(sorted_objectives):
+            getter_name = self._OBJECTIVE_GETTERS[name]
+            getter = getattr(self, getter_name)
+
         self.tx.backend.set_objective_n(
-            self._rule_weight(),
-            index=1,
-            priority=2,
-            name="Complexity",
-            abstol=self.complexity_tolerance,
-        )
-        self.tx.backend.set_objective_n(
-            self._highest_marginal_pressure(),
-            index=2,
-            priority=1,
-            name="Marginal Pressure",
+            getter(),
+            index=index,
+            priority=priority,
+            name=name.replace("_", " ").title(),
+            abstol=self.tolerances.get(name, 0),
         )
 
 
