@@ -11,7 +11,7 @@ class CvxpyBackend(AbstractBackend):
 
     def __init__(
         self,
-        solver: Optional[str] = "SCIP",
+        solver: Optional[str] = "HIGHS",
         suppress_output: bool = False,
         solver_params: Optional[dict] = None,
     ):
@@ -69,7 +69,9 @@ class CvxpyBackend(AbstractBackend):
     ):
         # CVXPY's implication operator `>>` doesn't work reliably between constraint types.
         # We use a big-M formulation for all constraint types as a workaround.
-        M = 1e9  # A large number, should be chosen carefully based on problem scaling.
+        # Note: M should be large enough to not constrain valid solutions, but small enough
+        # to avoid numerical instability in solvers like SCIP.
+        M = 1e6  # A large number, should be chosen carefully based on problem scaling.
 
         if isinstance(expression, cp.constraints.Equality):
             # It's an equality constraint, e.g., lhs == rhs.
