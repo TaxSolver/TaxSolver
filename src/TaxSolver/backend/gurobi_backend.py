@@ -55,10 +55,11 @@ class GurobiBackend(AbstractBackend):
     def add_gen_constr_max(
         self, res_var: Variable, variables: List[Variable], name: str = ""
     ):
-        # We need to create auxiliary variables that store the marginal pressure values
-        # for each person.
+        # Create auxiliary variables that store the marginal pressure values
+        # for each person. They must allow negative values since marginal rates can be
+        # negative (e.g., with k-group discounts).
         aux_vars = self.model.addVars(
-            len(variables), name="aux", vtype=gp.GRB.CONTINUOUS
+            len(variables), name="aux", lb=-1.0, vtype=gp.GRB.CONTINUOUS
         )
         for i in range(len(variables)):
             self.model.addConstr(aux_vars[i] == variables[i])
