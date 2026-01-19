@@ -129,37 +129,94 @@ class TaxRule:
         Notes
         -----
         Creates two Gurobi variables:
-        - rate: Continuous variable bounded by lb and ub
+        - rate: Continuous variable with bounds
         - b: Binary variable indicating whether the rule is active
 
         Also adds indicator constraints to handle rule inactivity based on
-        the rule_considered_inactive_at parameter.
+        the rule_considered_inactive_at parameter, and to enforce the true
+        lower bound when the rule is active.
+
+        When b=1 (active), additional indicator constraints enforce lb <= rate <= ub.
         """
         self.tx = tx
+
+        # Determine the inactive value for this rule
+        if isinstance(self.rule_considered_inactive_at, TaxRule):
+            inactive_val = None  # Will be linked to another rule's rate
+        else:
+            inactive_val = self.rule_considered_inactive_at
+
+        # Set variable bounds to include both active range AND inactive value
+        if inactive_val is not None:
+            var_lb = min(self.lb, inactive_val)
+            var_ub = max(self.ub, inactive_val)
+        else:
+            var_lb = self.lb
+            var_ub = self.ub
+
         self.rate: Variable = self.tx.backend.add_var(
             name=f"{self.name}_rate",
-            lb=self.lb,
-            ub=self.ub,
+            lb=var_lb,
+            ub=var_ub,
             var_type="continuous",
         )
         self.b: Variable = self.tx.backend.add_var(
             name=f"{self.name}_b", lb=0, ub=1, var_type="binary"
         )
 
+        # When b=0 (inactive), set rate to inactive value
         if isinstance(self.rule_considered_inactive_at, TaxRule):
             self.tx.backend.add_gen_constr_indicator(
                 self.b,
                 False,
                 self.rate == self.rule_considered_inactive_at.rate,
-                name=f"{self.name}_b_indicator",
+                name=f"{self.name}_b_indicator_inactive",
             )
         else:
             self.tx.backend.add_gen_constr_indicator(
                 self.b,
                 False,
                 self.rate == self.rule_considered_inactive_at,
-                name=f"{self.name}_b_indicator",
+                name=f"{self.name}_b_indicator_inactive",
             )
+
+        # When b=1 (active), enforce the true bounds: lb <= rate <= ub
+        if inactive_val is not None and (
+            inactive_val < self.lb or inactive_val > self.ub
+        ):
+            if inactive_val < self.lb:
+                self.tx.backend.add_gen_constr_indicator(
+                    self.b,
+                    True,
+                    self.rate >= self.lb,
+                    name=f"{self.name}_b_indicator_active_lb",
+                )
+            if inactive_val > self.ub:
+                self.tx.backend.add_gen_constr_indicator(
+                    self.b,
+                    True,
+                    self.rate <= self.ub,
+                    name=f"{self.name}_b_indicator_active_ub",
+                )
+
+    @property
+    def prev_bracket(self) -> "TaxRule | None":
+        """
+        Get the previous bracket rule if this rule is linked to one.
+
+        This property returns the rule that this bracket inherits from when
+        inactive (b=0). It's used by BracketConstraint to enforce ascending
+        rate constraints.
+
+        Returns
+        -------
+        TaxRule or None
+            The previous bracket rule, or None if rule_considered_inactive_at
+            is not a TaxRule (e.g., it's a numeric value like 0).
+        """
+        if isinstance(self.rule_considered_inactive_at, TaxRule):
+            return self.rule_considered_inactive_at
+        return None
 
     def calculate_tax(self, p: Person) -> grb.Var | grb.LinExpr:
         """
@@ -228,9 +285,20 @@ class TaxRule:
         If a marginal_pressure_scaler_var is specified, the rate is scaled
         by that variable's value. Otherwise, the rate is added directly
         to the person's new_marginal_rate.
+
+        Status quo marginal pressure values (sq_m_*) outside [-0.5, 1] are
+        treated as data errors and set to 0 with a warning.
         """
         if self.marginal_pressure_scaler_var:
             mp_scaler = p[self.marginal_pressure_scaler_var]
+            # Safeguard: Check if sq_m_ values are within reasonable bounds
+            # Values outside [-0.5, 1] are likely data errors
+            if mp_scaler < -0.5 or mp_scaler > 1:
+                print(
+                    f"WARNING: sq_marginal_pressure ({self.marginal_pressure_scaler_var}={mp_scaler}) "
+                    f"is extremely positive or negative for person {p['id']}. Setting to 0."
+                )
+                mp_scaler = 0
             p.new_marginal_rate += self.rate * mp_scaler
         else:
             p.new_marginal_rate += self.rate
