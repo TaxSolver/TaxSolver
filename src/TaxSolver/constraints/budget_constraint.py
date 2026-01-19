@@ -33,11 +33,32 @@ class BudgetConstraint(Constraint):
             hh.weighted_household_benefits for hh in self.households
         ]
 
-        self.new_expenditures = backend.quicksum(
+        # Create a variable for new_expenditures and link it via constraint
+        expenditures_expr = backend.quicksum(
             new_person_expenditures + new_household_benefits
         )
+        self.new_expenditures = backend.add_var(
+            name=f"new_expenditures_{self.name}",
+            lb=float("-inf"),
+            ub=float("inf"),
+            var_type="continuous",
+        )
+        backend.add_constr(
+            self.new_expenditures == expenditures_expr,
+            name=f"{self.name}_new_expenditures_def",
+        )
 
-        self.spend = self.new_expenditures - current_expenditures
+        # Create a variable for spend and link it via constraint
+        self.spend = backend.add_var(
+            name=f"spend_{self.name}",
+            lb=float("-inf"),
+            ub=float("inf"),
+            var_type="continuous",
+        )
+        backend.add_constr(
+            self.spend == self.new_expenditures - current_expenditures,
+            name=f"{self.name}_spend_def",
+        )
 
         print(
             "New Maximum:",
