@@ -168,8 +168,6 @@ tex/pres/
 *.mps
 # Ignore data
 
-paper/
-
 scratch.py
 synth/
 old_src/
