@@ -2,13 +2,13 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![arXiv](https://img.shields.io/badge/arXiv-DOI_10_48550-b31b1b.svg)](https://arxiv.org/abs/2508.03708)
+[![arXiv](https://img.shields.io/badge/arXiv-DOI%20TBD-b31b1b.svg)](https://arxiv.org/abs/DOI_TBD)
 
-**TaxSolver** is a constrained optimization-based tool that enables policymakers to design optimal income tax reforms by focusing on the desired outcomes of a reform in conjunction with fiscal guarantees that a reform has to abide by rather than ad-hoc rule adjustments.
+**TaxSolver** is a constrained optimization-based tool that enables policymakers to design optimal income tax reforms by focusing on the desired outcomes of a reform in conjunction with fiscal guarantees that a reform has to abide by rather than ad-hoc rule adjustments. Read our accompanying paper [Implementing Optimal Taxation: A Constrained Optimization Framework for Tax Reform](https://arxiv.org/abs/2508.03708).
 
 ## Abstract
 
-Across the developed world, there are growing calls to streamline and improve ever more complex income tax codes. Executing reform has proven difficult. Even when the desired outcomes of a reform are clear, the tools to design fitting reforms are lacking. To remedy this, we developed **TaxSolver**: a design tool for optimal income tax reform. TaxSolver allows policymakers to focus solely on what they aim to achieve with a tax reform — e.g. wealth redistribution, incentivizing work, reducing complexity etc. — and the guarantees within which reform can take place — e.g. limiting fluctuations in taxpayer incomes or overall tax revenues. Given these goals and guarantees, TaxSolver finds the optimal set of tax rules that satisfies all the criteria, often in a matter of minutes. We illustrate TaxSolver by reforming various examples, including one based on a real-world system.
+While optimal taxation theory provides clear prescriptions for tax design, translating these insights into actual tax codes remains difficult. Existing work largely offers theoretical characterizations of optimal systems, while practical implementation methods are scarce. Bridging this gap involves designing tax rules that meet theoretical goals, while accommodating administrative, distributional, and other practical constraints that arise in real-world reform. We develop a method casting tax reform as a constrained optimization problem by parametrizing the entire income tax code as a set of piecewise linear functions mapping tax-relevant inputs into liabilities and marginal rates. This allows users to impose constraints on marginal rate schedules, limits on income swings, and objectives like revenue neutrality, efficiency, simplicity, or distributional fairness that reflect both theoretical and practical considerations. The framework is computationally tractable for complex tax codes and flexible enough to accommodate diverse constraints, welfare objectives and behavioral responses. Whereas existing tools are typically used for ex-post `what-if' analysis of specific reforms, our framework explicitly incorporates real-world reform constraints and jointly optimizes across the full tax code. We illustrate the framework in several simulated settings, including a detailed reconstruction of the Dutch income tax system. For the Dutch case, we generate a family of reforms that smooth existing spikes in marginal tax rates to any desired cap, reduce the number of rules, and impose hard caps on income losses households can experience from the reform. We also introduce \texttt{TaxSolver}, an open-source package, allowing policymakers and researchers to implement and extend the framework.
 
 ## Key Features & Evidence for Practice
 
@@ -23,15 +23,18 @@ Across the developed world, there are growing calls to streamline and improve ev
 ## Installation
 
 ### Prerequisites
+
 - Python 3.8 or higher
 - pip package manager
 
 ### Install from source
+
 ```bash
 pip install git+https://github.com/Tax-Lab/TaxSolver.git
 ```
 
 ### Install for development
+
 ```bash
 git clone https://github.com/Tax-Lab/TaxSolver.git
 cd TaxSolver
@@ -39,9 +42,6 @@ pip install -e .
 ```
 
 ## Quick Start
-
-### Example
-Here is an example of a simple tax reform:
 
 ```python
 import os
@@ -98,22 +98,30 @@ tax_solver.add_objective(BudgetObjective(budget_constraint))
 # View results
 print(tax_solver.rules_and_rates_table())
 ```
-### Numerical solver
-We are using Gurobi as the numerical solver to solve the underlying optimization problem. You can request a free license for academic research [here](https://www.gurobi.com/features/academic-named-user-license/). We also support other LP/MILP solvers via our [cvxpy backend](https://www.cvxpy.org/tutorial/solvers/index.html#choosing-a-solver). For smaller toy systems, we found that the open source solver [SCIP](https://www.scipopt.org/) showed adequate performance.
+
+## Documentation
+
+- **Tutorial**: See `notebooks/example_notebook.ipynb` for a comprehensive walkthrough
+- **Documentation**: Check the `documentation/` directory for background:
+  - `methods.md`: Methods underlying `TaxSolver`
+  - `dataloader.md`: Preparing your data set for `TaxSolver`
 
 ## Project Structure
 
 ```
 TaxSolver/
 ├── src/TaxSolver/           # Main package
-│   ├── tax_solver.py        # Main class
-│   ├── backend/             # interaction with numerical solver (gurobi or others via cvxpy)
-│   ├── constraints/         # Constraint definitions
-│   ├── data_wrangling/      # Loading and transforming the input dataset
-│   ├── objective.py         # Reform objectives
-│   ├── rule.py              # Tax rule definitions
+│   ├── data_loader.py       # Data input handling
+│   ├── household/           # Household and person models
+│   ├── optimalisation/      # Optimization engine
+│   │   ├── constraints/     # Constraint definitions
+│   │   ├── rules/           # Tax rule implementations
+│   │   └── tax_solver/      # Core solver logic
+│   └── solved_system/       # Results and output
+├── paper/                   # Academic paper and examples
 ├── tests/                   # Test suite
-├── notebooks/               # Example Notebooks
+├── notebooks/               # Notebooks
+├── documentation/           # Background documentation
 └── data/                    # Example datasets
 ```
 
@@ -126,33 +134,33 @@ TaxSolver/
 
 ## Citation
 
-**Academic Paper**: A preprint version is available [here](https://arxiv.org/abs/2508.03708).
-
 If you use TaxSolver in your research, please cite:
 
 ```bibtex
-@article{taxsolver_2025,
-  title={TaxSolver: A Design Tool for Optimal Income Tax Reform},
-  author={Mark Donald Verhagen and Menno Schellekens and Michael Garstka},
-  journal={arXiv pre-print: 2508.03708},
+@article{taxsolver2024,
+  title={Implementing Optimal Taxation: A Constrained Optimization Framework for Tax Reform},
+  author={Verhagen, M.D, Schellekens, M., and Garstka, M.},
   year={2025},
-  note={Software available at: https://github.com/Tax-Lab/TaxSolver.git},
-  url={https://arxiv.org/abs/2508.03708}
+  note={Software available at: https://github.com/Tax-Lab/TaxSolver.git}
 }
 ```
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contributing and Support
+## Contributing
 
-We welcome contributions! Please use [GitHub Issues](https://github.com/Tax-Lab/TaxSolver/issues) to submit pull requests, report issues, and suggest improvements.
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and suggest improvements.
 
+## Support
 
+- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/Tax-Lab/TaxSolver/issues)
+- **Documentation**: Full documentation available at [project website] TODO
+- **Academic Paper**: [Link to published paper] TODO
 
 ## Authors
 
-- [Mark Verhagen](https://markverhagen.me/)
-- Menno Schellekens
-- [Michael Garstka](https://migarstka.github.io/)
+Mark Verhagen
+Menno Schellekens
+Michael Garstka
