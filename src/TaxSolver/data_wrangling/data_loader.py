@@ -347,7 +347,7 @@ class DataLoader:
                 or any(column.startswith(prefix) for prefix in self.prefixes)
             )
 
-        return self.df[[col for col in self.df.columns if is_valid_column(col)]]
+        self.df = self.df[[col for col in self.df.columns if is_valid_column(col)]]
 
     def _create_people_and_households(self) -> None:
         self.people = {}
