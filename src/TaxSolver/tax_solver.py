@@ -20,7 +20,7 @@ class TaxSolver:
     def __init__(
         self,
         households: dict[str, Household],
-        backend: AbstractBackend = CvxpyBackend(),
+        backend: Optional[AbstractBackend] = None,
         name: str = "TaxModel",
         behavioral_effects: bool = False,
         behavioral_elasticity: Optional[float] = None,
@@ -28,7 +28,9 @@ class TaxSolver:
         assert self._check_unique_ids(households), "Not all ids are unique strings!"
         self.objective: Optional[Objective] = None
         self.constraints: list[Constraint] = []
-        self.backend = backend
+        # Construct a fresh backend per solver to avoid sharing a single
+        # mutable default instance across all TaxSolver objects.
+        self.backend = backend if backend is not None else CvxpyBackend()
 
         self.rules: list[TaxRule] = []
         self.households: dict[str, Household] = households
