@@ -28,7 +28,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-          uv sync 
+          uv sync --extra dev
           uv pip install -e .
           pip install flake8
 
@@ -39,4 +39,4 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 src/TaxSolver --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
-      run: uv run pytest
+      run: uv run --extra dev pytest
