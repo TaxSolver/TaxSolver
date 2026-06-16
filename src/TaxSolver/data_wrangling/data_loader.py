@@ -224,7 +224,7 @@ class DataLoader:
 
         if self.hh_id:
             if self.hh_id in self.df.columns:
-                self.df.rename(columns={"hh_id": self.hh_id}, inplace=False)
+                self.df.rename(columns={self.hh_id: "hh_id"}, inplace=True)
             else:
                 print(
                     f"Warning: '{self.hh_id}' column specified as household ID but not found in the dataframe."
@@ -323,11 +323,11 @@ class DataLoader:
                     print(
                         f"Warning: No marginal pressure column created for '{rule.replace('sq_m_', '')}'. Set to 0."
                     )
-            self.df.rename(columns=tax_rule_dict, inplace=False)
+            self.df.rename(columns=tax_rule_dict, inplace=True)
 
         if self.mirror_id:
             if self.mirror_id in self.df.columns:
-                self.df.rename(columns={"mirror_id": self.mirror_id}, inplace=True)
+                self.df.rename(columns={self.mirror_id: "mirror_id"}, inplace=True)
             else:
                 print(
                     f"Warning: '{self.mirror_id}' column specified as mirror ID but not found in the dataframe."
