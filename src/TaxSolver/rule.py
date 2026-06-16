@@ -2,11 +2,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from functools import reduce
 import operator
-import gurobipy as grb
 from typing import Optional
 from TaxSolver.backend.abstract_backend import Variable
 
 if TYPE_CHECKING:
+    import gurobipy as grb
     from TaxSolver.population.person import Person
     from TaxSolver import TaxSolver
 
