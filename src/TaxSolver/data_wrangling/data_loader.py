@@ -391,7 +391,7 @@ class DataLoader:
 
         for p_id, p in self.people.items():
             if p.data.get("init_labor_effect_weight", None):
-                p.init_labor_effect_weight = p.data["labor_effect_weight"]
+                p.init_labor_effect_weight = p.data["init_labor_effect_weight"]
             elif p.data.get("mirror_id", False) and p.data.get("elasticity", None):
                 print(
                     f"Warning: labor_effects_weight not found for person {p['id']}. Using 1 as the default."
