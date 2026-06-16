@@ -128,7 +128,7 @@ class TaxSolver:
                 ]
             )
         else:
-            ValueError("System not solved yet")
+            raise ValueError("System not solved yet")
 
     def __repr__(self) -> str:
         if self.name:
