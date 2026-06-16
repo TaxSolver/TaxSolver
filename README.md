@@ -1,8 +1,8 @@
 # TaxSolver: A Design Tool for Optimal Income Tax Reform
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![arXiv](https://img.shields.io/badge/arXiv-DOI%20TBD-b31b1b.svg)](https://arxiv.org/abs/DOI_TBD)
+[![arXiv](https://img.shields.io/badge/arXiv-2508.03708-b31b1b.svg)](https://arxiv.org/abs/2508.03708)
 
 **TaxSolver** is a constrained optimization-based tool that enables policymakers to design optimal income tax reforms by focusing on the desired outcomes of a reform in conjunction with fiscal guarantees that a reform has to abide by rather than ad-hoc rule adjustments. Read our accompanying paper [Implementing Optimal Taxation: A Constrained Optimization Framework for Tax Reform](https://arxiv.org/abs/2508.03708).
 
@@ -24,7 +24,7 @@ While optimal taxation theory provides clear prescriptions for tax design, trans
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.11 or higher
 - pip package manager
 
 ### Install from source
@@ -52,10 +52,11 @@ from TaxSolver.data_wrangling.data_loader import DataLoader
 from TaxSolver.data_wrangling.bracket_input import BracketInput
 from TaxSolver.objective import BudgetObjective
 
-# Load taxpayer data from a system with 6 brackets into TaxSolver format
+# Load taxpayer data from a system with 6 brackets into TaxSolver format.
+# In the bundled example file the after-tax income column is named "outcome_1".
 dl = DataLoader(path=os.path.join("data", "example", "simple_simul_1000.xlsx"), 
                 income_before_tax="income_before_tax", 
-                income_after_tax="income_after_tax")
+                income_after_tax="outcome_1")
 
 # Initialize the solver
 tax_solver = tx.TaxSolver(dl.households)
@@ -89,11 +90,11 @@ budget_constraint = BudgetConstraint(
 # Add constraints to the solver
 tax_solver.add_constraints([income_constraint, budget_constraint])
 
+# Add an objective to the optimization (required before solving)
+tax_solver.add_objective(BudgetObjective(budget_constraint))
+
 # Solve the optimization problem
 tax_solver.solve()
-
-# Add an objective to the optimization
-tax_solver.add_objective(BudgetObjective(budget_constraint))
 
 # View results
 print(tax_solver.rules_and_rates_table())
@@ -101,27 +102,25 @@ print(tax_solver.rules_and_rates_table())
 
 ## Documentation
 
-- **Tutorial**: See `notebooks/example_notebook.ipynb` for a comprehensive walkthrough
-- **Documentation**: Check the `documentation/` directory for background:
-  - `methods.md`: Methods underlying `TaxSolver`
-  - `dataloader.md`: Preparing your data set for `TaxSolver`
+- **Tutorial**: See `notebooks/example_notebook.ipynb` and
+  `notebooks/readme_notebook.ipynb` for walkthroughs.
+- **Methods**: See `paper/methods.md` for the methodology underlying `TaxSolver`.
 
 ## Project Structure
 
 ```
 TaxSolver/
 ├── src/TaxSolver/           # Main package
-│   ├── data_loader.py       # Data input handling
-│   ├── household/           # Household and person models
-│   ├── optimalisation/      # Optimization engine
-│   │   ├── constraints/     # Constraint definitions
-│   │   ├── rules/           # Tax rule implementations
-│   │   └── tax_solver/      # Core solver logic
-│   └── solved_system/       # Results and output
+│   ├── tax_solver.py        # Core solver orchestration
+│   ├── rule.py              # Tax/benefit rule definitions
+│   ├── objective.py         # Optimization objectives
+│   ├── backend/             # Solver backends (CVXPY/HiGHS, Gurobi)
+│   ├── constraints/         # Constraint definitions
+│   ├── data_wrangling/      # Data loading and bracket inputs
+│   └── population/          # Household and person models
 ├── paper/                   # Academic paper and examples
 ├── tests/                   # Test suite
 ├── notebooks/               # Notebooks
-├── documentation/           # Background documentation
 └── data/                    # Example datasets
 ```
 
@@ -137,10 +136,12 @@ TaxSolver/
 If you use TaxSolver in your research, please cite:
 
 ```bibtex
-@article{taxsolver2024,
+@article{taxsolver2025,
   title={Implementing Optimal Taxation: A Constrained Optimization Framework for Tax Reform},
-  author={Verhagen, M.D, Schellekens, M., and Garstka, M.},
+  author={Verhagen, M.D. and Schellekens, M. and Garstka, M.},
   year={2025},
+  eprint={2508.03708},
+  archivePrefix={arXiv},
   note={Software available at: https://github.com/Tax-Lab/TaxSolver.git}
 }
 ```
