@@ -281,13 +281,13 @@ class SequentialMixedObjective(BudgetObjective):
             getter_name = self._OBJECTIVE_GETTERS[name]
             getter = getattr(self, getter_name)
 
-        self.tx.backend.set_objective_n(
-            getter(),
-            index=index,
-            priority=priority,
-            name=name.replace("_", " ").title(),
-            abstol=self.tolerances.get(name, 0),
-        )
+            self.tx.backend.set_objective_n(
+                getter(),
+                index=index,
+                priority=priority,
+                name=name.replace("_", " ").title(),
+                abstol=self.tolerances.get(name, 0),
+            )
 
 
 class WeightedMixedObjective(BudgetObjective):
