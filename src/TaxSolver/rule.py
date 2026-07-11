@@ -2,11 +2,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from functools import reduce
 import operator
-import gurobipy as grb
 from typing import Optional
 from TaxSolver.backend.abstract_backend import Variable
 
 if TYPE_CHECKING:
+    import gurobipy as grb
     from TaxSolver.population.person import Person
     from TaxSolver import TaxSolver
 
@@ -97,7 +97,7 @@ class TaxRule:
         marginal_pressure_scaler_var: Optional[str] = None,
         rule_considered_inactive_at: float | TaxRule = 0,
         weight: float = 1,
-        metadata: dict = {},
+        metadata: Optional[dict] = None,
     ) -> None:
         self.name = name
         self.var_name: list[str] = (
@@ -112,7 +112,7 @@ class TaxRule:
         self.marginal_pressure = marginal_pressure
         self.marginal_pressure_scaler_var = marginal_pressure_scaler_var
         self.rule_considered_inactive_at = rule_considered_inactive_at
-        self.metadata = metadata
+        self.metadata = metadata if metadata is not None else {}
 
     def bind_and_initialize(self, tx: TaxSolver) -> None:
         """
@@ -362,7 +362,7 @@ class FlatTaxRule(TaxRule):
         rule_considered_inactive_at: float | TaxRule = 0,
         marginal_pressure: bool = False,
         weight: Optional[float] = None,
-        metadata: dict = {},
+        metadata: Optional[dict] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -417,7 +417,7 @@ class BenefitRule(TaxRule):
         var_name: list[str] | str,
         ub: float = float("inf"),
         weight: Optional[float] = None,
-        metadata: dict = {},
+        metadata: Optional[dict] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -472,7 +472,7 @@ class HouseholdBenefit(TaxRule):
         var_name: list[str] | str,
         ub: float = float("inf"),
         weight: Optional[float] = None,
-        metadata: dict = {},
+        metadata: Optional[dict] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -538,7 +538,7 @@ class BracketRule(TaxRule):
         lb: Optional[float] = None,
         ub: Optional[float] = None,
         weight: Optional[float] = None,
-        metadata: dict = {},
+        metadata: Optional[dict] = None,
     ) -> None:
         self.name = name
         self.var_name = var_name if isinstance(var_name, list) else [var_name]
@@ -657,7 +657,7 @@ class PreTaxBenefit(TaxRule):
         lb: float,
         ub: float,
         weight: Optional[float] = None,
-        metadata: dict = {},
+        metadata: Optional[dict] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -717,7 +717,7 @@ class ExistingBenefit(TaxRule):
         lb: float,
         ub: float,
         weight: Optional[float] = None,
-        metadata: dict = {},
+        metadata: Optional[dict] = None,
     ) -> None:
         super().__init__(
             name=name,

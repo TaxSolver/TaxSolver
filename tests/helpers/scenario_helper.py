@@ -1,3 +1,5 @@
+from typing import Optional
+
 from TaxSolver.data_wrangling.data_loader import DataLoader
 from TaxSolver.constraints.budget_constraint import BudgetConstraint
 from TaxSolver.constraints.income_constraint import IncomeConstraint
@@ -20,8 +22,10 @@ class ScenarioHelper:
         include_tags: list[str],
         exclude_tags: list[str],
         overall_income_constraint: float = 0.01,
-        backend: AbstractBackend = CvxpyBackend(),
+        backend: Optional[AbstractBackend] = None,
     ):
+        if backend is None:
+            backend = CvxpyBackend()
         self.households = DataLoader(
             data_path,
             income_before_tax="income_before_tax",

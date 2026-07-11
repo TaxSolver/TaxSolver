@@ -119,6 +119,32 @@ class Objective:
             "marginal_pressure in SequentialMixedObjective."
         )
 
+    def _wage_output_change(self) -> Variable:
+        """
+        Get the wage_output_change variable from the LaborEffects constraint.
+
+        Returns
+        -------
+        Variable
+            Backend variable representing the relative change in aggregate wage
+            output induced by behavioral labor-supply responses.
+
+        Raises
+        ------
+        ValueError
+            If no LaborEffects constraint has been added to the solver.
+        """
+        from TaxSolver.constraints.labor_effects import LaborEffects
+
+        for constraint in self.tx.constraints:
+            if isinstance(constraint, LaborEffects):
+                return constraint.wage_output_change
+
+        raise ValueError(
+            "No LaborEffects constraint found. Add one before using "
+            "WeightedMixedLabourEffectsObjective."
+        )
+
 
 class NullObjective(Objective):
     """
@@ -281,13 +307,13 @@ class SequentialMixedObjective(BudgetObjective):
             getter_name = self._OBJECTIVE_GETTERS[name]
             getter = getattr(self, getter_name)
 
-        self.tx.backend.set_objective_n(
-            getter(),
-            index=index,
-            priority=priority,
-            name=name.replace("_", " ").title(),
-            abstol=self.tolerances.get(name, 0),
-        )
+            self.tx.backend.set_objective_n(
+                getter(),
+                index=index,
+                priority=priority,
+                name=name.replace("_", " ").title(),
+                abstol=self.tolerances.get(name, 0),
+            )
 
 
 class WeightedMixedObjective(BudgetObjective):
@@ -409,6 +435,6 @@ class WeightedMixedLabourEffectsObjective(BudgetObjective):
             self._spend()
             + self._rule_weight() * self.complexity_penalty
             + self._highest_marginal_pressure() * self.marginal_pressure_penalty
-            + -1 * self.tx.wage_output_change * self.labor_effects_penalty,
+            + -1 * self._wage_output_change() * self.labor_effects_penalty,
             "minimize",
         )
