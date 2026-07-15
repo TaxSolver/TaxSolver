@@ -3,11 +3,14 @@ Behavioral Effects Constraint
 
 Models the income change due to behavioral responses to marginal tax rate changes.
 
-Assumed elasticity formula:
-    behavioral_income_change = elasticity × (old_marginal_rate - new_marginal_rate) × income
+Assumed elasticity formula (standard elasticity of taxable income, defined
+with respect to the net-of-tax rate 1 - tau):
+    behavioral_income_change = elasticity × (old_marginal_rate - new_marginal_rate)
+                               / (1 - old_marginal_rate) × income
 
-The elasticity represents how much income increases (as a fraction) for a 
-1 percentage point decrease in marginal tax pressure.
+The elasticity is the proportional change in reported income per proportional
+change in the net-of-tax rate (Gruber & Saez 2002). Since old_marginal_rate is
+data, the response remains linear in the new marginal rate.
 
 This changed income is then taxed at the new marginal rate:
     behavioral_tax_effect = behavioral_income_change × new_marginal_rate
@@ -44,9 +47,10 @@ class BehavioralEffects(Constraint):
     Parameters
     ----------
     elasticity : float, optional
-        The labor supply elasticity. If None, uses per-person elasticity from data.
-        A value of 0.25 means a 1 percentage point DECREASE in marginal rate
-        leads to a 0.25% INCREASE in income. Default is None.
+        The elasticity of taxable income with respect to the net-of-tax rate.
+        If None, uses per-person elasticity from data. A value of 0.25 means a
+        1% increase in the net-of-tax rate (1 - marginal rate) leads to a
+        0.25% increase in reported income. Default is None.
 
     Attributes
     ----------
@@ -113,9 +117,13 @@ class BehavioralEffects(Constraint):
             income = person["income_before_tax"]
             old_marginal_rate = person["marginal_rate_current"]
 
-            # Gross income change due to behavioral response
+            # Gross income change due to behavioral response (net-of-tax-rate
+            # form: old_marginal_rate is data, so this is linear in the new rate)
             person.behavioral_income_change = (
-                elasticity * (old_marginal_rate - person.new_marginal_rate) * income
+                elasticity
+                * (old_marginal_rate - person.new_marginal_rate)
+                / (1 - old_marginal_rate)
+                * income
             )
 
             # Create variable for behavioral tax effect
