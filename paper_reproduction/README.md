@@ -60,22 +60,9 @@ Notes:
   bottom once; the figure cells can then be re-run standalone.
 - The Figure 11 cell computes each household's percentage change in net
   income against the same status-quo baseline the solver's own income
-  guarantee uses (`old_household_income = sum(income_after_tax)`, see
-  `IncomeConstraint`/`Household.old_household_income` in `../src/TaxSolver`),
-  compared against `new_net_income + new_household_benefits` (not
-  `new_net_income` alone -- the household-level benefit has to be added back
-  in, since `get_household_table` in this notebook reports it as a separate
-  column). This is what makes the 5% income floor land exactly at -5% in the
-  plotted distribution, which is a good sanity check if this cell is ever
-  modified. Households with a near-zero status-quo net income (an income
-  before tax of €0, effectively fully benefit-supported) are excluded, since
-  a percentage change against a near-zero base isn't meaningful.
+  guarantee uses.
 - `fig12_guarantee_frontier.ipynb` likewise saves its sweep tables to
-  `./systems/` incrementally (safe to interrupt) and re-plots from them. Its
-  last section (marginal-pressure-cap sweep) is optional supplementary data
-  collection, not required for `case_frontier_caps.png` or any other figure;
-  it's kept at the end of the notebook so the main pipeline above it reads as
-  one uninterrupted run.
+  `./systems/` incrementally (safe to interrupt) and re-plots from them.
 - All income guarantees on the low-income group use the manuscript's 5%
   floor (`IncomeConstraint(-0.05)`) consistently.
 
@@ -100,15 +87,12 @@ The instrumented run scripts behind `table_performance.tex` and
   model after each solve, plus hardware/solver metadata
   (`python solve_stats.py` prints the hardware summary).
 - `run_stats_small.py`: recovery/reform solves of the illustrative cases and
-  the dynamic-bracketing demo -> `systems/computational_stats_small.csv`
-  (seconds).
+  the dynamic-bracketing demo.
 - `run_stats_behavioral.py`: direct MIQP vs Algorithm 1 fixed point per
   elasticity -> `systems/computational_stats_behavioral.csv` (~1 min).
 - `run_stats_nl.py`: the Dutch reform at every cap gamma, solved both as the
   stand-alone stage-1 MILP and as the two-stage sequential procedure ->
-  `systems/computational_stats_nl.csv` (~2 h). Under the uniform 1,800s
-  per-solve budget, the gamma=0.65 cardinality stage does not close (12.8%
-  terminal gap).
+  `systems/computational_stats_nl.csv`.
 - `run_stats_nl_gamma65_extended.py`: reruns just that one gamma=0.65
   cardinality stage with the time limit relaxed to 4 hours -> confirms proven
   optimality (gap 0) after 2,252s; appends a `_4h`-suffixed row to the same
@@ -122,13 +106,11 @@ The instrumented run scripts behind `table_performance.tex` and
   `sequential`) -> `systems/computational_stats_scaling.csv` (30 min limit
   for 1x/10x, 4 h for 100x). `table_scaling.tex` uses both modes per factor
   (the reported "Two-stage" reproduces the two-stage `sequential` runs; the
-  x100 "Stage 1" time is read from *inside* that same sequential run's log,
+  x100 "Stage 1" time is read from inside that same sequential run's log,
   since the stand-alone `budget_only` attempt at that size timed out without
   finding an incumbent).
 - `make_table_rows.py`: writes `output/tables/table_performance.tex` and
-  `output/tables/table_scaling.tex` from the CSVs above (two terminal MIP
-  gaps predate the CSV column that records them and are instead parsed from
-  the raw Gurobi solve logs in `systems/*.log`).
+  `output/tables/table_scaling.tex`.
 - `make_table_descriptives_nl.py`: regenerates
   `output/tables/table_descriptives_nl_case.tex` (Table S3) from
   `data/NL_persons_headers_preprocessed_equal_weights.xlsx`.
