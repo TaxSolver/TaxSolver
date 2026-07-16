@@ -3,7 +3,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![arXiv](https://img.shields.io/badge/arXiv-2508.03708-b31b1b.svg)](https://arxiv.org/abs/2508.03708)
-[![DOI](https://zenodo.org/badge/1023689283.svg)](https://doi.org/10.5281/zenodo.21320272)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21400248.svg)](https://doi.org/10.5281/zenodo.21400248)
 
 **TaxSolver** is a constrained optimization-based tool that enables policymakers to design optimal income tax reforms by focusing on the desired outcomes of a reform in conjunction with fiscal guarantees that a reform has to abide by rather than ad-hoc rule adjustments. Read our accompanying paper [Implementing Optimal Taxation: A Constrained Optimization Framework for Tax Reform](https://arxiv.org/abs/2508.03708).
 
